@@ -10,7 +10,7 @@ You can also run it locally by opening `index.html` in a modern browser.
 
 ## What is included
 
-- Revenue, order count, average order value and estimated profit cards.
+- Revenue from completed orders, total non-cancelled order count, average completed-order value and estimated profit cards.
 - Filters for 7, 30 and 90 days.
 - A revenue trend chart.
 - Sales totals grouped by channel and category.
@@ -19,7 +19,7 @@ You can also run it locally by opening `index.html` in a modern browser.
 
 ## About the numbers
 
-All data in this project is fictional and generated in the browser. It is useful for showing the interface and filtering behavior, but it is not connected to a real shop, payment service or inventory system. The profit margin is a demo assumption, not a calculation from a real business.
+All data in this project is fictional and generated in the browser. It is useful for showing the interface and filtering behavior, but it is not connected to a real shop, payment service or inventory system. Pending orders are included in the order count but not in revenue or average order value. The profit margin is a demo assumption, not a calculation from a real business.
 
 For real business use, the dashboard would need a secure backend, user access controls and a reliable database.
 

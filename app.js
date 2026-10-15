@@ -19,7 +19,7 @@ function make(tag,className,text){const el=document.createElement(tag);if(classN
 function progress(container,label,value,max,color){const row=make("div","bar-row");const info=make("div","bar-info");info.append(make("span","",label),make("strong","",money(value)));const track=make("div","track");const fill=make("div","fill");fill.style.width=(max?value/max*100:0)+"%";if(color)fill.style.background=color;track.append(fill);row.append(info,track);container.append(row)}
 function chart(rows,days){
  const byDate=new Map();for(let i=days-1;i>=0;i--){const d=new Date(today);d.setDate(today.getDate()-i);byDate.set(d.toISOString().slice(0,10),0)}
- for(const o of rows)if(o.status!=="Cancelled")byDate.set(o.date,(byDate.get(o.date)||0)+o.amount);
+ for(const o of rows)if(o.status==="Completed")byDate.set(o.date,(byDate.get(o.date)||0)+o.amount);
  const points=[...byDate.values()],max=Math.max(1,...points),w=720,h=218,l=54,r=12,t=12,b=30,iw=w-l-r,ih=h-t-b;
  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox",`0 0 ${w} ${h}`);svg.setAttribute("role","img");svg.setAttribute("aria-label",`Revenue trend for the last ${days} days`);
  function el(tag,attrs,text){const x=document.createElementNS(svg.namespaceURI,tag);for(const [k,v] of Object.entries(attrs))x.setAttribute(k,v);if(text!==undefined)x.textContent=text;svg.append(x);return x}
@@ -34,12 +34,15 @@ function chart(rows,days){
 function render(){
  const days=Number($("range").value);const cutoff=new Date(today);cutoff.setDate(today.getDate()-(days-1));const start=cutoff.toISOString().slice(0,10);
  current=orders.filter(o=>o.date>=start);
- const valid=current.filter(o=>o.status!=="Cancelled");
- const revenue=valid.reduce((s,o)=>s+o.amount,0),count=valid.length,profit=Math.round(revenue*.24);
- $("revenue").textContent=money(revenue);$("orderCount").textContent=count.toLocaleString("en-PK");$("aov").textContent=money(count?revenue/count:0);$("profit").textContent=money(profit);$("margin").textContent="Estimated margin: 24% (demo assumption)";
+ const orderCount=current.filter(o=>o.status!=="Cancelled").length;
+ const completedOrders=current.filter(o=>o.status==="Completed");
+ const revenue=completedOrders.reduce((sum,order)=>sum+order.amount,0);
+ const count=completedOrders.length;
+ const profit=Math.round(revenue*.24);
+ $("revenue").textContent=money(revenue);$("orderCount").textContent=orderCount.toLocaleString("en-PK");$("aov").textContent=money(count?revenue/count:0);$("profit").textContent=money(profit);$("margin").textContent="Estimated margin: 24% (demo assumption)";
  chart(current,days);
  const channelsTotal=Object.fromEntries(channels.map(c=>[c,0]));const categoryTotal=Object.fromEntries(categories.map(c=>[c,0]));
- for(const o of valid){channelsTotal[o.channel]+=o.amount;categoryTotal[o.category]+=o.amount}
+ for(const o of completedOrders){channelsTotal[o.channel]+=o.amount;categoryTotal[o.category]+=o.amount}
  $("channelList").replaceChildren();const colors=["#526ff0","#8e71e7","#35b69b","#f1b55c"];channels.forEach((c,i)=>progress($("channelList"),c,channelsTotal[c],revenue,colors[i]));
  $("categoryList").replaceChildren();Object.entries(categoryTotal).sort((a,b)=>b[1]-a[1]).forEach(([c,v])=>progress($("categoryList"),c,v,revenue));
  $("stockList").replaceChildren();for(const [name,sku,qty] of products){const row=make("div","stock-row");const info=make("div");info.append(make("div","stock-name",name),make("span","stock-sku",sku));row.append(info,make("span","stock-pill"+(qty<=2?" critical":""),qty+" left"));$("stockList").append(row)}
